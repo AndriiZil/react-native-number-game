@@ -3,6 +3,8 @@ import { StyleSheet, ImageBackground, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { StatusBar } from 'expo-status-bar';
 
 import StartGameScreen from './screens/StartGameScreen';
 import GameScreen from './screens/GameScreen';
@@ -10,6 +12,25 @@ import Colors from './constans/colors';
 import GameOverScreen from './screens/GameOverScreen';
 
 export default function App() {
+  const [, setOrientation] = useState(null);
+  useEffect(() => {
+    checkOrientation();
+    const subscription = ScreenOrientation.addOrientationChangeListener(
+      handleOrientationChange
+    );
+    return () => {
+      ScreenOrientation.removeOrientationChangeListeners(subscription);
+    };
+  }, []);
+
+  const checkOrientation = async () => {
+    const orientation = await ScreenOrientation.getOrientationAsync();
+    setOrientation(orientation);
+  };
+  const handleOrientationChange = (o) => {
+    setOrientation(o.orientationInfo.orientation);
+  };
+
   const [fontsLoaded] = useFonts({
     'open-sans': require('./assets/fonts/OpenSans-Regular.ttf'),
     'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf'),
@@ -59,23 +80,25 @@ export default function App() {
   }
 
   return (
-    <LinearGradient
-        colors={[Colors.primary700,
-        Colors.accent500]}
+    <>
+      <LinearGradient
         style={styles.rootScreen}
         onLayout={onLayoutRootView}
-    >
-      <ImageBackground
-        source={require('./assets/images/dices-1.jpg')}
-        resizeMode='cover'
-        style={styles.rootScreen}
-        imageStyle={styles.backgroundImage}
+        colors={[Colors.primary700, Colors.accent500]}
       >
-        <SafeAreaView style={styles.rootScreen}>
-          {screen}
-        </SafeAreaView>
-      </ImageBackground>
-    </LinearGradient>
+        <ImageBackground
+          source={require('./assets/images/dices-1.jpg')}
+          resizeMode='cover'
+          style={styles.rootScreen}
+          imageStyle={styles.backgroundImage}
+        >
+          <SafeAreaView style={styles.rootScreen}>
+            {screen}
+          </SafeAreaView>
+        </ImageBackground>
+      </LinearGradient>
+      <StatusBar style='light' />
+    </>
   )
 }
 
